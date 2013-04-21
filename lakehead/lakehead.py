@@ -24,12 +24,13 @@ def chdir(path, makedirs=False):
         os.chdir(cwd)
 
 @contextmanager
-def mktmpdir(prefix='lakehead'):
+def mktmpdir(debug=False, prefix='lakehead'):
     try:
         tmpdir = tempfile.mkdtemp(prefix=prefix)
         yield tmpdir
     finally:
-        shutil.rmtree(tmpdir, ignore_errors=True)
+        if not debug:
+            shutil.rmtree(tmpdir, ignore_errors=True)
     
 class Config(object):
     def __init__(self, project_name):
@@ -54,9 +55,9 @@ def build(opts):
         if os.path.exists('mock.cfg'):
             config.configdir = os.getcwd()
 
-        with mktmpdir() as results:
+        with mktmpdir(opts.debug) as results:
             config.results = results
-            with mktmpdir() as sources:
+            with mktmpdir(opts.debug) as sources:
                 with chdir(sources):
                     urlretrieve(config.source, os.path.basename(config.source))
 
@@ -81,6 +82,8 @@ def build(opts):
 def main():
     parser = optparse.OptionParser()
     parser.add_option('-p', '--project', help='Build project name.')
+    parser.add_option('-d', '--debug', default=False, action='store_true',
+                        help='Turn on debugging, do not delete tempfiles')
     opts, args = parser.parse_args()
 
     build(opts)
