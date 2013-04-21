@@ -63,7 +63,7 @@ def build(opts):
                 config.sources = sources
                 mock_cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
                             ' --buildsrpm --spec=%(name)s.spec'
-                            ' --resultdir=%(results)s'
+                            ' --resultdir=%(results)s --no-clean'
                             ' --sources=%(sources)s' % config).split()
                 mock = Popen(mock_cmd)
                 mock.communicate()
