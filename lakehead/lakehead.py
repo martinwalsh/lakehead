@@ -40,6 +40,10 @@ class Config(object):
     def __getitem__(self, key):
         return self.json[key]
 
+    def __setattr__(self, name, value):
+        self.json[name] = value
+        object.__setattr__(self, name, value)
+
 def buildsrpm(opts):
     cwd = os.getcwd()
     with chdir(opts.project):
