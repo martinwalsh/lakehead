@@ -79,4 +79,4 @@ def main():
     parser.add_option('-p', '--project', help='Build project name.')
     opts, args = parser.parse_args()
 
-    buildsrpm(opts)
+    build(opts)
