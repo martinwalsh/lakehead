@@ -58,7 +58,7 @@ def buildsrpm(opts):
                 urlretrieve(config.source)
 
             config.sources = sources
-            mock_cmd = ('mock --configdir=%(configdir)s -r mock'
+            mock_cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
                         ' --buildsrpm --spec=%(name)s.spec'
                         ' --sources=%(sources)s' % config).split()
             mock = Popen(mock_cmd, stdout=PIPE, stderr=STDOUT)
