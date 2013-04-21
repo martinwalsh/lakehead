@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import optparse
+
 import os as _os
 from contextlib import contextmanager
 
@@ -15,5 +17,10 @@ def chdir(path, makedirs=False):
     finally:
         _os.chdir(cwd)
 
-def main(*args):
+def main():
+    parser = optparse.OptionParser()
+    opts, args = parser.parse_args()
+
+    print opts
     print args
+    
