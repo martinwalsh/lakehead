@@ -37,7 +37,7 @@ class Config(object):
 def buildsrpm(opts):
     cwd = os.getcwd()
     with chdir(opts.project):
-        config = Config()
+        config = Config(opts.project)
         config.configdir = cwd
         if os.path.exists('mock.cfg'):
             config.configdir = os.getcwd()
