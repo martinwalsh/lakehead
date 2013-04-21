@@ -1,26 +1,62 @@
 #!/usr/bin/env python
+import os
+import json
+import tempfile
 import optparse
 
-import os as _os
+from urllib import urlretrieve
 from contextlib import contextmanager
+from subprocess import Popen, PIPE, STDOUT
 
 __all__ = ['chdir', 'main']
 
 @contextmanager
 def chdir(path, makedirs=False):
-    cwd = _os.getcwd()
+    cwd = os.getcwd()
     try:
-        if makedirs and not _os.path.isdir(path):
-            _os.makedirs(path)
-        _os.chdir(path)
+        if makedirs and not os.path.isdir(path):
+            os.makedirs(path)
+        os.chdir(path)
         yield path
     finally:
-        _os.chdir(cwd)
+        os.chdir(cwd)
+
+@contextmanager
+def mktmpdir(dir='lakehead'):
+    try:
+        tmpdir = tempfile.mkdtemp(dir=dir)
+        yield tmpdir
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+    
+class Config(object):
+    def __init__(self, project_name):
+        with open('%s.json' % project_name) as f:
+            self.__dict__.update(json.load(f))
+
+def buildsrpm(opts):
+    cwd = os.getcwd()
+    with chdir(opts.project):
+        config = Config()
+        config.configdir = cwd
+        if os.path.exists('mock.cfg'):
+            config.configdir = os.getcwd()
+
+        with mktmpdir() as sources:
+            with chdir(sources):
+                urlretrieve(config.source)
+
+            config.sources = sources
+            mock_cmd = ('mock --configdir=%(configdir)s -r mock'
+                        ' --buildsrpm --spec=%(name)s.spec'
+                        ' --sources=%(sources)s' % config).split()
+            mock = Popen(mock_cmd, stdout=PIPE, stderr=STDOUT)
+            stdout, _ = mock.communicate()
+            print stdout
 
 def main():
     parser = optparse.OptionParser()
+    parser.add_option('-p', '--project', help='Build project name.')
     opts, args = parser.parse_args()
 
-    print opts
-    print args
-    
+    buildsrpm(opts)
