@@ -5,9 +5,9 @@ import shutil
 import tempfile
 import optparse
 
+from subprocess import Popen
 from urllib import urlretrieve
 from contextlib import contextmanager
-from subprocess import Popen, PIPE, STDOUT
 
 __all__ = ['chdir', 'main']
 
@@ -61,9 +61,8 @@ def buildsrpm(opts):
             mock_cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
                         ' --buildsrpm --spec=%(name)s.spec'
                         ' --sources=%(sources)s' % config).split()
-            mock = Popen(mock_cmd, stdout=PIPE, stderr=STDOUT)
-            stdout, _ = mock.communicate()
-            print stdout
+            mock = Popen(mock_cmd)
+            _, _ = mock.communicate()
 
 def main():
     parser = optparse.OptionParser()
