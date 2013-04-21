@@ -68,7 +68,8 @@ def build(opts):
                 mock.communicate()
 
             mock_cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
-                        ' --rebuild %(results)s/%(name)s-*.src.rpm' % config).split()
+                        ' --no-clean --rebuild'
+                        ' %(results)s/%(name)s-*.src.rpm' % config).split()
             mock = Popen(mock_cmd)
             mock.communicate()
             for fname in glob('%s/*.rpm' % results):
