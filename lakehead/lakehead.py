@@ -95,11 +95,12 @@ def update_repo(srpm, rpms):
                         Popen('createrepo --update .').communicate()
 
 def build(opts):
-    config = Config(opts.project)
-
+    # load default mock config
     mock_config = glob(get_abspath('mock/*'))
 
     with chdir(opts.project):
+        config = Config(opts.project)
+
         project_dir = os.getcwd()
         mock_config.extend(glob(get_abspath('mock/*')))
 
