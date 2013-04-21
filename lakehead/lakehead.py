@@ -33,7 +33,12 @@ def mktmpdir(prefix='lakehead'):
 class Config(object):
     def __init__(self, project_name):
         with open('%s.json' % project_name) as f:
-            self.__dict__.update(json.load(f))
+            self.json = json.load(f)
+        # allow attribute-style lookups
+        self.__dict__.update(self.json)
+
+    def __getitem__(self, key):
+        return self.json[key]
 
 def buildsrpm(opts):
     cwd = os.getcwd()
