@@ -2,7 +2,7 @@
 import os as _os
 from contextlib import contextmanager
 
-__all__ = ['chdir']
+__all__ = ['chdir', 'main']
 
 @contextmanager
 def chdir(path, makedirs=False):
