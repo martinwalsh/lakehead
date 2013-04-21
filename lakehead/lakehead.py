@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import json
+import types
 import shutil
 import tempfile
 import optparse
@@ -24,12 +25,12 @@ def chdir(path, makedirs=False):
         os.chdir(cwd)
 
 @contextmanager
-def mktmpdir(debug=False, prefix='lakehead'):
+def mktmpdir(preserve=False, prefix='lakehead'):
     try:
         tmpdir = tempfile.mkdtemp(prefix=prefix)
         yield tmpdir
     finally:
-        if not debug:
+        if not preserve:
             shutil.rmtree(tmpdir, ignore_errors=True)
     
 class Config(object):
@@ -47,37 +48,84 @@ class Config(object):
     def __setitem__(self, key, value):
         setattr(self, key, value)
 
+def buildSRPM(**kwds):
+    cmd = ('/usr/bin/mock -v --configdir=%(configdir)s -r mock'
+           ' --buildsrpm --spec=%(name)s.spec'
+           ' --resultdir=%(resultdir)s'
+           ' --sources=%(sourcesdir)s' % kwds).split()
+    Popen(cmd).communicate()
+
+def buildRPM(**kwds):
+    cmd = ('/usr/bin/mock -v --configdir=%(configdir)s -r mock'
+           ' --rebuild --resultdir %(resultdir)s %(resultdir)s/'
+           '%(name)s-%(version)s-%(release)s.%(dist)s.src.rpm' % kwds).split()
+    Popen(cmd).communicate()
+
+def update_repo(rpms): pass
+
+def get_abspath(relpath, base=os.getcwd()):
+    return os.path.realpath(os.path.abspath(os.path.join(base, relpath)))
+
+# This works for local/relative paths also
+def download(src, dst):
+    urlretrieve(src, dst)
+
+def download_to_cwd(sources):
+    if type(sources) in types.StringTypes:
+        sources = [sources]
+    for source in sources:
+        # The get_abspath call here is redundant for safety
+        download(get_abspath(source), os.path.basename(source))
+
+def update_repo(srpm, rpms):
+    with chdir('/var/www/repo'):
+        with chdir('SRPMS'):
+            download_to_cwd(srpm)
+            Popen('createrepo --update .').communicate()
+
+        with chdir('RPMS'):
+            for fname in rpms:
+                if 'noarch' in fname:
+                    with chdir('noarch'):
+                        download_to_cwd(fname)
+                        Popen('createrepo --update .').communicate()
+                else:
+                    with chdir('x86_64'):
+                        download_to_cwd(fname)
+                        Popen('createrepo --update .').communicate()
+
 def build(opts):
-    cwd = os.getcwd()
+    config = Config(opts.project)
+
+    mock_config = glob(get_abspath('mock/*'))
+
     with chdir(opts.project):
-        config = Config(opts.project)
-        config.configdir = cwd
-        if os.path.exists('mock.cfg'):
-            config.configdir = os.getcwd()
+        project_dir = os.getcwd()
+        mock_config.extend(glob(get_abspath('mock/*')))
 
-        with mktmpdir(opts.debug) as results:
-            config.results = results
-            with mktmpdir(opts.debug) as sources:
-                with chdir(sources):
-                    urlretrieve(config.source, os.path.basename(config.source))
+        with mktmpdir(opts.debug) as configdir:
+            with chdir(configdir):
+                download_to_cwd(mock_config)
 
-                config.sources = sources
-                mock_cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
-                            ' --buildsrpm --spec=%(name)s.spec'
-                            ' --resultdir=%(results)s'
-                            ' --sources=%(sources)s' % config).split()
-                mock = Popen(mock_cmd)
-                mock.communicate()
+            with mktmpdir(opts.debug) as resultdir:
+                with mktmpdir(opts.debug) as sourcedir:
+                    with chdir(sourcedir):
+                        download_to_cwd(config.source)
+                        for pattern in config.other_sources:
+                            download_to_cwd(
+                                glob(get_abspath(pattern, project_dir))
+                            )
+                        buildSRPM(
+                            configdir=configdir, resultdir=resultdir,
+                            sourcedir=sourcedir, **config)
+                        buildRPM(
+                            configdir=configdir, 
+                            resultdir=resultdir, **config)
 
-            mock_cmd = (
-                '/usr/bin/mock --configdir=%(configdir)s -r mock'
-                ' --rebuild --resultdir %(results)s %(results)s/'
-                '%(name)s-%(version)s-%(release)s.%(dist)s.src.rpm' % config
-                ).split()
-            mock = Popen(mock_cmd)
-            mock.communicate()
-            for fname in glob('%s/*.rpm' % results):
-                shutil.copy2(fname, '/tmp/%s' % os.path.basename(fname))
+                with chdir(resultdir):
+                    srpm = get_abspath(glob('*.src.rpm')[0])
+                    rpms = [get_abspath(rpm) for rpm in glob('*.rpm')]
+                    update_repo(srpm, rpms)
 
 def main():
     parser = optparse.OptionParser()
