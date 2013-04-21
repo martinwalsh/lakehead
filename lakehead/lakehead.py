@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import optparse
 
+from glob import glob
 from subprocess import Popen
 from urllib import urlretrieve
 from contextlib import contextmanager
