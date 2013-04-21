@@ -23,9 +23,9 @@ def chdir(path, makedirs=False):
         os.chdir(cwd)
 
 @contextmanager
-def mktmpdir(dir='lakehead'):
+def mktmpdir(prefix='lakehead'):
     try:
-        tmpdir = tempfile.mkdtemp(dir=dir)
+        tmpdir = tempfile.mkdtemp(prefix=prefix)
         yield tmpdir
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
