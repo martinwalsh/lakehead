@@ -70,7 +70,7 @@ def build(opts):
                 mock.communicate()
 
             mock_cmd = (
-                '/usr/bin/mock --configdir=%(configdir)s -r mock --no-clean'
+                '/usr/bin/mock --configdir=%(configdir)s -r mock'
                 ' --rebuild --resultdir %(results)s %(results)s/'
                 '%(name)s-%(version)s-%(release)s.%(dist)s.src.rpm' % config
                 ).split()
