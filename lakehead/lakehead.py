@@ -55,7 +55,7 @@ def buildsrpm(opts):
 
         with mktmpdir() as sources:
             with chdir(sources):
-                urlretrieve(config.source)
+                urlretrieve(config.source, os.path.basename(config.source))
 
             config.sources = sources
             mock_cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
