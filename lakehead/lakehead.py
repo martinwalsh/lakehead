@@ -70,7 +70,7 @@ def build(opts):
 
             mock_cmd = (
                 '/usr/bin/mock --configdir=%(configdir)s -r mock --no-clean'
-                ' --rebuild --resultsdir %(results)s %(results)s/'
+                ' --rebuild --resultdir %(results)s %(results)s/'
                 '%(name)s-%(version)s-%(release)s.%(dist)s.src.rpm' % config
                 ).split()
             mock = Popen(mock_cmd)
