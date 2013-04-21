@@ -45,7 +45,7 @@ class Config(object):
     def __setitem__(self, key, value):
         setattr(self, key, value)
 
-def buildsrpm(opts):
+def build(opts):
     cwd = os.getcwd()
     with chdir(opts.project):
         config = Config(opts.project)
@@ -53,16 +53,26 @@ def buildsrpm(opts):
         if os.path.exists('mock.cfg'):
             config.configdir = os.getcwd()
 
-        with mktmpdir() as sources:
-            with chdir(sources):
-                urlretrieve(config.source, os.path.basename(config.source))
+        with mktmpdir() as results:
+            config.results = results
+            with mktmpdir() as sources:
+                with chdir(sources):
+                    urlretrieve(config.source, os.path.basename(config.source))
 
-            config.sources = sources
+                config.sources = sources
+                mock_cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
+                            ' --buildsrpm --spec=%(name)s.spec'
+                            ' --resultdir=%(results)s'
+                            ' --sources=%(sources)s' % config).split()
+                mock = Popen(mock_cmd)
+                mock.communicate()
+
             mock_cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
-                        ' --buildsrpm --spec=%(name)s.spec'
-                        ' --sources=%(sources)s' % config).split()
+                        ' --rebuild %(results)/%(name)-*.src.rpm' % config).split()
             mock = Popen(mock_cmd)
-            _, _ = mock.communicate()
+            mock.communicate()
+            for fname in glob('%s/*.rpm' % results):
+                shutil.copy2(fname, '/tmp/%s' % os.path.basename(fname))
 
 def main():
     parser = optparse.OptionParser()
