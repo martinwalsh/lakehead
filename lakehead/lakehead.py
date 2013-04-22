@@ -70,12 +70,12 @@ def get_abspath(relpath, base=os.getcwd()):
 def download(src, dst):
     urlretrieve(src, dst)
 
+# local path sources should be absolute
 def download_to_cwd(sources):
     if type(sources) in types.StringTypes:
         sources = [sources]
     for source in sources:
-        # The get_abspath call here is redundant for safety
-        download(get_abspath(source), os.path.basename(source))
+        download(source, os.path.basename(source))
 
 def update_repo(srpm, rpms):
     with chdir('/var/www/repo'):
