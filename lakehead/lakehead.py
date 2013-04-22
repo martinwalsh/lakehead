@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 import json
 import types
 import shutil
@@ -54,7 +55,8 @@ class Config(object):
 
 class BadExitStatus(StandardError): pass
 def spawn(cmd):
-    print '+ %s' % ' '.join(cmd)
+    sys.stdout.write('+ %s\n' % ' '.join(cmd))
+    sys.stdout.flush()
     process = Popen(cmd)
     process.communicate()
     if process.poll():
