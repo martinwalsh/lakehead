@@ -53,14 +53,14 @@ class Config(object):
         return dict((k, getattr(self, k)) for k in self.keys) 
 
 def buildSRPM(**kwds):
-    cmd = ('/usr/bin/mock -v --configdir=%(configdir)s -r mock'
+    cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
            ' --buildsrpm --spec=%(name)s.spec'
            ' --resultdir=%(resultdir)s'
            ' --sources=%(sourcedir)s' % kwds).split()
     Popen(cmd).communicate()
 
 def buildRPM(**kwds):
-    cmd = ('/usr/bin/mock -v --configdir=%(configdir)s -r mock'
+    cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
            ' --rebuild --resultdir %(resultdir)s %(resultdir)s/'
            '%(name)s-%(version)s-%(release)s.%(dist)s.src.rpm' % kwds).split()
     Popen(cmd).communicate()
