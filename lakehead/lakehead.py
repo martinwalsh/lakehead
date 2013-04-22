@@ -21,7 +21,7 @@ def chdir(path, makedirs=False):
         if makedirs and not os.path.isdir(path):
             os.makedirs(path)
         os.chdir(path)
-        sys.stdout.write('+ (%s) cd %s\n' % (cwd, path))
+        sys.stdout.write('++ (%s) cd %s\n' % (cwd, path))
         sys.stdout.flush()
         yield path
     finally:
@@ -57,7 +57,7 @@ class Config(object):
 
 class BadExitStatus(StandardError): pass
 def spawn(cmd):
-    sys.stdout.write('+ %s\n' % ' '.join(cmd))
+    sys.stdout.write('++ %s\n' % ' '.join(cmd))
     sys.stdout.flush()
     process = Popen(cmd)
     process.communicate()
