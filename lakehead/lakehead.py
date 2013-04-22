@@ -54,7 +54,7 @@ class Config(object):
 
 def buildSRPM(**kwds):
     cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
-           ' --buildsrpm --spec=%(name)s.spec'
+           ' --buildsrpm --spec=%(spec)s'
            ' --resultdir=%(resultdir)s'
            ' --sources=%(sourcedir)s' % kwds).split()
     Popen(cmd).communicate()
@@ -106,6 +106,7 @@ def build(opts):
         config = Config(opts.project)
 
         project_dir = os.getcwd()
+        spec_file = get_abspath('%(name)s.spec' % config)
         mock_config.extend(glob(get_abspath('mock/*')))
 
         with mktmpdir(opts.debug) as configdir:
@@ -122,7 +123,8 @@ def build(opts):
                             )
                         buildSRPM(
                             configdir=configdir, resultdir=resultdir,
-                            sourcedir=sourcedir, **config.dict())
+                            sourcedir=sourcedir, spec=spec_file, 
+                            **config.dict())
                         buildRPM(
                             configdir=configdir, 
                             resultdir=resultdir, **config.dict())
