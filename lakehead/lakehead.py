@@ -94,18 +94,18 @@ def update_repo(srpm, rpms):
     with chdir('/var/www/repo'):
         with chdir('SRPMS'):
             download_to_cwd(srpm)
-            Popen('createrepo --update .').communicate()
+            Popen('/usr/bin/createrepo --update .').communicate()
 
         with chdir('RPMS'):
             for fname in rpms:
                 if 'noarch' in fname:
                     with chdir('noarch'):
                         download_to_cwd(fname)
-                        Popen('createrepo --update .').communicate()
+                        Popen('/usr/bin/createrepo --update .').communicate()
                 else:
                     with chdir('x86_64'):
                         download_to_cwd(fname)
-                        Popen('createrepo --update .').communicate()
+                        Popen('/usr/bin/createrepo --update .').communicate()
 
 def build(opts):
     # load default mock config
