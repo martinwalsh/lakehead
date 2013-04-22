@@ -72,8 +72,6 @@ def buildRPM(**kwds):
            '%(name)s-%(version)s-%(release)s.%(dist)s.src.rpm' % kwds).split()
     spawn(cmd)
 
-def update_repo(rpms): pass
-
 def get_abspath(relpath, base=None):
     if base is None:
         base = os.getcwd()
@@ -141,6 +139,7 @@ def build(opts):
                 with chdir(resultdir):
                     srpm = get_abspath(glob('*.src.rpm')[0])
                     rpms = [get_abspath(rpm) for rpm in glob('*.rpm')]
+                    rpms.remove(srpm)
                     update_repo(srpm, rpms)
 
 def main():
