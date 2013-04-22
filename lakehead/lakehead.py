@@ -52,18 +52,25 @@ class Config(object):
     def dict(self):
         return dict((k, getattr(self, k)) for k in self.keys) 
 
+class BadExitStatus(StandardError): pass
+def spawn(cmd):
+    process = Popen(cmd)
+    process.communicate()
+    if process.poll():
+        raise BadExitStatus(cmd)
+
 def buildSRPM(**kwds):
     cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
            ' --buildsrpm --spec=%(spec)s'
            ' --resultdir=%(resultdir)s'
            ' --sources=%(sourcedir)s' % kwds).split()
-    Popen(cmd).communicate()
+    spawn(cmd)
 
 def buildRPM(**kwds):
     cmd = ('/usr/bin/mock --configdir=%(configdir)s -r mock'
            ' --rebuild --resultdir %(resultdir)s %(resultdir)s/'
            '%(name)s-%(version)s-%(release)s.%(dist)s.src.rpm' % kwds).split()
-    Popen(cmd).communicate()
+    spawn(cmd)
 
 def update_repo(rpms): pass
 
