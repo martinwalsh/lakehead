@@ -56,7 +56,7 @@ def buildSRPM(**kwds):
     cmd = ('/usr/bin/mock -v --configdir=%(configdir)s -r mock'
            ' --buildsrpm --spec=%(name)s.spec'
            ' --resultdir=%(resultdir)s'
-           ' --sources=%(sourcesdir)s' % kwds).split()
+           ' --sources=%(sourcedir)s' % kwds).split()
     Popen(cmd).communicate()
 
 def buildRPM(**kwds):
