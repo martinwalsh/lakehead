@@ -54,6 +54,7 @@ class Config(object):
 
 class BadExitStatus(StandardError): pass
 def spawn(cmd):
+    print '+ %s' % ' '.join(cmd)
     process = Popen(cmd)
     process.communicate()
     if process.poll():
