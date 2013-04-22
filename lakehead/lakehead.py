@@ -37,6 +37,7 @@ class Config(object):
     def __init__(self, project_name):
         with open('%s.json' % project_name) as f:
             d = json.load(f)
+        self.keys = d.keys()
         self.__dict__.update(d)
 
     def __getitem__(self, key):
@@ -47,6 +48,9 @@ class Config(object):
 
     def __setitem__(self, key, value):
         setattr(self, key, value)
+
+    def dict(self):
+        return dict((k, getattr(self, k)) for k in self.keys) 
 
 def buildSRPM(**kwds):
     cmd = ('/usr/bin/mock -v --configdir=%(configdir)s -r mock'
@@ -118,10 +122,10 @@ def build(opts):
                             )
                         buildSRPM(
                             configdir=configdir, resultdir=resultdir,
-                            sourcedir=sourcedir, **config)
+                            sourcedir=sourcedir, **config.dict())
                         buildRPM(
                             configdir=configdir, 
-                            resultdir=resultdir, **config)
+                            resultdir=resultdir, **config.dict())
 
                 with chdir(resultdir):
                     srpm = get_abspath(glob('*.src.rpm')[0])
