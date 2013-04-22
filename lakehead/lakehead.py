@@ -21,6 +21,8 @@ def chdir(path, makedirs=False):
         if makedirs and not os.path.isdir(path):
             os.makedirs(path)
         os.chdir(path)
+        sys.stdout.write('+ (%s) cd %s\n' % (cwd, path))
+        sys.stdout.flush()
         yield path
     finally:
         os.chdir(cwd)
