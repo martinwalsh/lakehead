@@ -67,7 +67,9 @@ def buildRPM(**kwds):
 
 def update_repo(rpms): pass
 
-def get_abspath(relpath, base=os.getcwd()):
+def get_abspath(relpath, base=None):
+    if base is None:
+        base = os.getcwd()
     return os.path.realpath(os.path.abspath(os.path.join(base, relpath)))
 
 # This works for local/relative paths also
